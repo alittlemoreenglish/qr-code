@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <div class="settings">
+            <!-- URL Input -->
+            <div class="form-group">
+                <label for="url">URL to encode:</label>
+                <input type="text" id="url" placeholder="Enter URL">
+            </div>
+
+            <!-- Title Input -->
+            <div class="form-group">
+                <label for="title">Title (optional):</label>
+                <input type="text" id="title" placeholder="Enter title">
+            </div>
+
+            <!-- Center Element: Text or Image -->
+            <div class="form-group">
+                <label for="center-type">Center Element:</label>
+                <select id="center-type">
+                    <option value="none">None</option>
+                    <option value="text">Text</option>
+                    <option value="image">Image</option>
+                </select>
+            </div>
+
+            <!-- Center Text Input -->
+            <div class="form-group" id="center-text-group" style="display: none;">
+                <label for="center-text">Center Text:</label>
+                <input type="text" id="center-text" placeholder="Enter text">
+            </div>
+
+            <!-- Center Image Input -->
+            <div class="form-group" id="center-image-group" style="display: none;">
+                <label for="center-image">Center Image:</label>
+                <input type="file" id="center-image" accept="image/*">
+                <input type="text" id="center-image-url" placeholder="Or paste image URL">
+            </div>
+
+            <!-- QR Code Color Settings -->
+            <div class="form-group">
+                <label for="qr-color">QR Code Color:</label>
+                <input type="color" id="qr-color" value="#000000">
+            </div>
+
+            <!-- Background Color Settings -->
+            <div class="form-group">
+                <label for="bg-color">Background Color:</label>
+                <input type="color" id="bg-color" value="#FFFFFF">
+            </div>
+
+            <!-- Dot Style Settings -->
+            <div class="form-group">
+                <label for="dot-style">Dot Style:</label>
+                <select id="dot-style">
+                    <option value="square">Square</option>
+                    <option value="rounded">Rounded</option>
+                    <option value="dots">Dots</option>
+                </select>
+            </div>
+
+            <!-- Download Format -->
+            <div class="form-group">
+                <label for="download-format">Download Format:</label>
+                <select id="download-format">
+                    <option value="png">PNG</option>
+                    <option value="jpg">JPG</option>
+                    <option value="svg">SVG</option>
+                </select>
+            </div>
+
+            <!-- Include URL in Image -->
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="include-url"> Include URL in Image
+                </label>
+            </div>
+
+            <!-- Buttons -->
+            <div class="buttons">
+                <button id="generate">Generate QR Code</button>
+                <button id="save-settings">Save Settings</button>
+            </div>
+        </div>
+
+        <!-- QR Code Display -->
+        <div class="qr-display">
+            <div id="qrcode"></div>
+            <p id="url-display" style="display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
