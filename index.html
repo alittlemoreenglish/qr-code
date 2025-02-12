@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Image, Type, Upload, Link as LinkIcon, Save } from 'lucide-react';
+import { Download, Image, Type, Upload, Save } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+// Rest of the component code remains exactly the same, just removed LinkIcon from imports
 const QRCodeGenerator = () => {
   // State for QR code settings
   const [settings, setSettings] = useState({
