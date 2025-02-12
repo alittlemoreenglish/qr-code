@@ -78,3 +78,12 @@ button:hover {
     margin-top: 10px;
     color: #666;
 }
+
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    color: #6b7280;
+    font-size: 0.875rem;
+}
