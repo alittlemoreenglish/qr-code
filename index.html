@@ -347,20 +347,35 @@
             const qrImage = document.querySelector('#qrcode img');
             ctx.drawImage(qrImage, 0, 0, settings.width, settings.height);
 
-            // Create white background for text
+            // Set up text properties
+            ctx.font = '20px Arial';
             const textWidth = ctx.measureText(text).width;
-            const padding = 10;
+            const textHeight = 20; // Approximate height of the text
+            const padding = 15; // Increased padding around text
+            const rectWidth = textWidth + (padding * 2);
+            const rectHeight = textHeight + (padding * 2);
+
+            // Create white background for text with rounded corners
+            const x = (settings.width - rectWidth) / 2;
+            const y = (settings.height - rectHeight) / 2;
+            const radius = 5; // Radius for rounded corners
+
             ctx.fillStyle = settings.colorLight;
-            ctx.fillRect(
-                (settings.width - textWidth) / 2 - padding,
-                settings.height / 2 - 15,
-                textWidth + padding * 2,
-                30
-            );
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + rectWidth - radius, y);
+            ctx.arcTo(x + rectWidth, y, x + rectWidth, y + radius, radius);
+            ctx.lineTo(x + rectWidth, y + rectHeight - radius);
+            ctx.arcTo(x + rectWidth, y + rectHeight, x + rectWidth - radius, y + rectHeight, radius);
+            ctx.lineTo(x + radius, y + rectHeight);
+            ctx.arcTo(x, y + rectHeight, x, y + rectHeight - radius, radius);
+            ctx.lineTo(x, y + radius);
+            ctx.arcTo(x, y, x + radius, y, radius);
+            ctx.closePath();
+            ctx.fill();
 
             // Draw center text
             ctx.fillStyle = settings.colorDark;
-            ctx.font = '20px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(text, settings.width / 2, settings.height / 2);
@@ -375,24 +390,25 @@
             const ctx = canvas.getContext('2d');
             const qrImage = document.querySelector('#qrcode img');
             const title = document.getElementById('title').value;
+            const margin = 40; // Margin around the QR code
             
-            // Set canvas size with extra space for title if needed
-            canvas.width = settings.width;
-            canvas.height = title ? settings.height + 40 : settings.height;
+            // Set canvas size with margins and extra space for title if needed
+            canvas.width = settings.width + (margin * 2);
+            canvas.height = title ? settings.height + (margin * 2) + 40 : settings.height + (margin * 2);
 
-            // Draw white background
+            // Draw white background for entire canvas
             ctx.fillStyle = settings.colorLight;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw QR code
-            ctx.drawImage(qrImage, 0, 0, settings.width, settings.height);
+            // Draw QR code with margins
+            ctx.drawImage(qrImage, margin, margin, settings.width, settings.height);
 
             // Add title if specified
             if (title) {
                 ctx.fillStyle = settings.colorDark;
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(title, canvas.width / 2, settings.height + 25);
+                ctx.fillText(title, canvas.width / 2, settings.height + margin + 25);
             }
 
             // Create download link
@@ -401,32 +417,7 @@
             link.download = 'qrcode.png';
             link.click();
         }
-
-        // Handle file upload
-        document.getElementById('centerImage').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    addCenterImage(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Event listeners for real-time updates
-        document.getElementById('url').addEventListener('input', generateQR);
-        document.getElementById('qrColor').addEventListener('input', generateQR);
-        document.getElementById('backgroundColor').addEventListener('input', generateQR);
-        document.getElementById('imageUrl').addEventListener('input', generateQR);
-        document.getElementById('centerText').addEventListener('input', generateQR);
-
-        // Load saved settings on page load
-        loadSettings();
-        // Generate initial QR code if URL is present
-        if (document.getElementById('url').value) {
-            generateQR();
-        }
+        
     </script>
 </body>
 </html>
