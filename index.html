@@ -118,10 +118,12 @@
             word-break: break-all;
         }
 
-        .error {
-            color: red;
-            margin-top: 5px;
-            font-size: 0.9em;
+        .center-content {
+            display: none;
+        }
+
+        .center-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -145,14 +147,6 @@
             <div class="settings-group">
                 <h3>Style Settings</h3>
                 <div class="form-group">
-                    <label for="dotStyle">Dot Style</label>
-                    <select id="dotStyle">
-                        <option value="square">Square</option>
-                        <option value="dots">Dots</option>
-                        <option value="rounded">Rounded</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="qrColor">QR Code Color</label>
                     <input type="color" id="qrColor" value="#000000">
                 </div>
@@ -165,15 +159,27 @@
             <div class="settings-group">
                 <h3>Center Logo Settings</h3>
                 <div class="form-group">
+                    <label for="centerType">Center Content Type</label>
+                    <select id="centerType">
+                        <option value="none">None</option>
+                        <option value="upload">Upload Image</option>
+                        <option value="url">Image URL</option>
+                        <option value="text">Center Text</option>
+                    </select>
+                </div>
+                
+                <div id="uploadImage" class="center-content form-group">
                     <label for="centerImage">Upload Image</label>
                     <input type="file" id="centerImage" accept="image/*">
                 </div>
-                <div class="form-group">
-                    <label for="imageUrl">Or Image URL</label>
+                
+                <div id="urlImage" class="center-content form-group">
+                    <label for="imageUrl">Image URL</label>
                     <input type="text" id="imageUrl" placeholder="Enter image URL">
                 </div>
-                <div class="form-group">
-                    <label for="centerText">Or Center Text</label>
+                
+                <div id="textContent" class="center-content form-group">
+                    <label for="centerText">Center Text</label>
                     <input type="text" id="centerText" placeholder="Enter center text">
                 </div>
             </div>
@@ -185,9 +191,7 @@
         </div>
 
         <div class="button-group">
-            <button onclick="downloadQR('png')">Download PNG</button>
-            <button onclick="downloadQR('jpg')">Download JPG</button>
-            <button onclick="downloadQR('svg')">Download SVG</button>
+            <button onclick="downloadQR()">Download PNG</button>
             <button onclick="saveSettings()">Save Settings</button>
         </div>
     </div>
@@ -203,6 +207,24 @@
             correctLevel: QRCode.CorrectLevel.H,
         };
 
+        // Handle center content type selection
+        document.getElementById('centerType').addEventListener('change', function(e) {
+            // Hide all center content inputs
+            document.querySelectorAll('.center-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected input
+            const selected = e.target.value;
+            if (selected !== 'none') {
+                const targetElement = selected === 'upload' ? 'uploadImage' :
+                                    selected === 'url' ? 'urlImage' : 'textContent';
+                document.getElementById(targetElement).classList.add('active');
+            }
+            
+            generateQR();
+        });
+
         // Load saved settings
         function loadSettings() {
             const savedSettings = localStorage.getItem('qrCodeSettings');
@@ -210,11 +232,15 @@
                 const parsed = JSON.parse(savedSettings);
                 document.getElementById('url').value = parsed.url || '';
                 document.getElementById('title').value = parsed.title || '';
-                document.getElementById('dotStyle').value = parsed.dotStyle || 'square';
                 document.getElementById('qrColor').value = parsed.qrColor || '#000000';
                 document.getElementById('backgroundColor').value = parsed.backgroundColor || '#ffffff';
+                document.getElementById('centerType').value = parsed.centerType || 'none';
                 document.getElementById('imageUrl').value = parsed.imageUrl || '';
                 document.getElementById('centerText').value = parsed.centerText || '';
+                
+                // Show appropriate center content input
+                const event = new Event('change');
+                document.getElementById('centerType').dispatchEvent(event);
             }
         }
 
@@ -223,9 +249,9 @@
             const currentSettings = {
                 url: document.getElementById('url').value,
                 title: document.getElementById('title').value,
-                dotStyle: document.getElementById('dotStyle').value,
                 qrColor: document.getElementById('qrColor').value,
                 backgroundColor: document.getElementById('backgroundColor').value,
+                centerType: document.getElementById('centerType').value,
                 imageUrl: document.getElementById('imageUrl').value,
                 centerText: document.getElementById('centerText').value
             };
@@ -254,14 +280,14 @@
                 ...settings
             });
 
-            // Add center logo or text if specified
-            const logoUrl = document.getElementById('imageUrl').value;
-            const centerText = document.getElementById('centerText').value;
-            
-            if (logoUrl) {
-                addCenterImage(logoUrl);
-            } else if (centerText) {
-                addCenterText(centerText);
+            // Handle center content based on selected type
+            const centerType = document.getElementById('centerType').value;
+            if (centerType === 'url') {
+                const logoUrl = document.getElementById('imageUrl').value;
+                if (logoUrl) addCenterImage(logoUrl);
+            } else if (centerType === 'text') {
+                const centerText = document.getElementById('centerText').value;
+                if (centerText) addCenterText(centerText);
             }
 
             // Update URL display
@@ -316,7 +342,7 @@
         }
 
         // Download QR code
-        function downloadQR(format) {
+        function downloadQR() {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const qrImage = document.querySelector('#qrcode img');
@@ -343,40 +369,29 @@
 
             // Create download link
             const link = document.createElement('a');
-            if (format === 'svg') {
-                // Convert to SVG
-                const svg = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
-                        <image href="${canvas.toDataURL()}" width="${canvas.width}" height="${canvas.height}"/>
-                    </svg>
-                `;
-                const blob = new Blob([svg], { type: 'image/svg+xml' });
-                link.href = URL.createObjectURL(blob);
-            } else {
-                link.href = canvas.toDataURL(`image/${format}`);
-            }
-            link.download = `qrcode.${format}`;
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'qrcode.png';
             link.click();
         }
 
-        // Event listeners
-        document.getElementById('url').addEventListener('input', generateQR);
-        document.getElementById('qrColor').addEventListener('input', generateQR);
-        document.getElementById('backgroundColor').addEventListener('input', generateQR);
-        document.getElementById('dotStyle').addEventListener('change', generateQR);
-        document.getElementById('imageUrl').addEventListener('input', generateQR);
-        document.getElementById('centerText').addEventListener('input', generateQR);
+        // Handle file upload
         document.getElementById('centerImage').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('imageUrl').value = e.target.result;
-                    generateQR();
+                    addCenterImage(e.target.result);
                 };
                 reader.readAsDataURL(file);
             }
         });
+
+        // Event listeners for real-time updates
+        document.getElementById('url').addEventListener('input', generateQR);
+        document.getElementById('qrColor').addEventListener('input', generateQR);
+        document.getElementById('backgroundColor').addEventListener('input', generateQR);
+        document.getElementById('imageUrl').addEventListener('input', generateQR);
+        document.getElementById('centerText').addEventListener('input', generateQR);
 
         // Load saved settings on page load
         loadSettings();
