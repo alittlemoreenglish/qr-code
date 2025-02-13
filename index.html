@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Previous head section remains the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        /* Previous styles remain the same */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2980b9;
@@ -280,23 +282,31 @@
                 ...settings
             });
 
-            // Handle center content based on selected type
-            const centerType = document.getElementById('centerType').value;
-            if (centerType === 'url') {
-                const logoUrl = document.getElementById('imageUrl').value;
-                if (logoUrl) addCenterImage(logoUrl);
-            } else if (centerType === 'text') {
-                const centerText = document.getElementById('centerText').value;
-                if (centerText) addCenterText(centerText);
-            }
+            // Wait for QR code to be generated
+            setTimeout(() => {
+                // Handle center content based on selected type
+                const centerType = document.getElementById('centerType').value;
+                if (centerType === 'url') {
+                    const logoUrl = document.getElementById('imageUrl').value;
+                    if (logoUrl) {
+                        addCenterImage(logoUrl);
+                    }
+                } else if (centerType === 'text') {
+                    const centerText = document.getElementById('centerText').value;
+                    if (centerText) {
+                        addCenterText(centerText);
+                    }
+                }
 
-            // Update URL display
-            document.getElementById('urlDisplay').textContent = url;
+                // Update URL display
+                document.getElementById('urlDisplay').textContent = url;
+            }, 100);
         }
 
         // Add center image
         function addCenterImage(imageUrl) {
             const img = new Image();
+            img.crossOrigin = "Anonymous";  // Enable CORS for image loading
             img.src = imageUrl;
             img.onload = function() {
                 const canvas = document.createElement('canvas');
@@ -308,14 +318,21 @@
                 const qrImage = document.querySelector('#qrcode img');
                 ctx.drawImage(qrImage, 0, 0, settings.width, settings.height);
 
-                // Draw center image
+                // Create white background for center logo
                 const size = settings.width * 0.2;
                 const x = (settings.width - size) / 2;
                 const y = (settings.height - size) / 2;
+                ctx.fillStyle = settings.colorLight;
+                ctx.fillRect(x - 5, y - 5, size + 10, size + 10);
+
+                // Draw center image
                 ctx.drawImage(img, x, y, size, size);
 
                 // Replace QR code with modified version
                 qrImage.src = canvas.toDataURL();
+            };
+            img.onerror = function() {
+                alert('Error loading image. Please check the URL and try again.');
             };
         }
 
@@ -329,6 +346,17 @@
             // Draw QR code
             const qrImage = document.querySelector('#qrcode img');
             ctx.drawImage(qrImage, 0, 0, settings.width, settings.height);
+
+            // Create white background for text
+            const textWidth = ctx.measureText(text).width;
+            const padding = 10;
+            ctx.fillStyle = settings.colorLight;
+            ctx.fillRect(
+                (settings.width - textWidth) / 2 - padding,
+                settings.height / 2 - 15,
+                textWidth + padding * 2,
+                30
+            );
 
             // Draw center text
             ctx.fillStyle = settings.colorDark;
